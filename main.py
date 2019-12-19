@@ -6,30 +6,55 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
 from sklearn.linear_model import LinearRegression
+import os
 
-# banknote auth set imp.
-# df = pd.read_csv("data_banknote_authentication.csv")
+# Shows the dataset folder content
+arr = os.listdir("datasets/")
 
-# heart disease set imp.
-df = pd.read_csv("heart.csv")
+# Prints all datasets in dataset folder
+for i in arr:
+    print(f'{arr.index(i)}{". "}{i}')
 
+# Choose a dataset from folder
+# Read .csv file and define it as dataframe.
+while True:
+    try:
+        selected_dataset_index = int(input("Choose a dataset: "))
+        print(f'{"Selected dataset: "}{arr[selected_dataset_index]}')
+        df = pd.read_csv("datasets/" + arr[selected_dataset_index].format(str))
+        break
+    except IndexError:
+        print("We knew that you'll try this M. Gökhan bey. :D")
+
+# Creates an array and assign the dataframe to this array
 dataset = df.values
+
+print(dataset.shape)
+print(len(dataset[0]) - 1)
+
+# Takes inputs for prediction according to chosen dataset
+inputs = []
+for i in range(len(dataset[0]) - 1):
+    inputs.append(float(input(f'{"Enter the "}{i}{". input: "}')))
+
+# Prints the input you choose to console
+for i in inputs:
+    print(i, end=' ')
 
 # Define the column number
 column_num = dataset.shape.__getitem__(1)
-string = 'Number of attributes: '
-print("{}{}".format(string, column_num - 1))
+print(f'{"Number of attributes: "}{column_num - 1}')
 
-# Specify the attributes and outputs
+# Specify the input values and outputs
 x = dataset[:, 0:column_num - 1]
 y = dataset[:, column_num - 1]
 
 # Compress the data between 0-1
 min_max_scaler = preprocessing.MinMaxScaler()
-x_scale = min_max_scaler.fit_transform(x)
+x_scaled = min_max_scaler.fit_transform(x)
 
 # Split the set as train set, test set, validation set
-x_train, x_val_and_test, y_train, y_val_and_test = train_test_split(x_scale, y, test_size=0.3)
+x_train, x_val_and_test, y_train, y_val_and_test = train_test_split(x_scaled, y, test_size=0.3)
 x_val, x_test, y_val, y_test = train_test_split(x_val_and_test, y_val_and_test, test_size=0.5)
 
 # Define model architecture
@@ -54,9 +79,14 @@ model.evaluate(x_test, y_test)[1]
 # Linear Regression
 regressor = LinearRegression()
 regressor.fit(x, y)
-pickle.dump(regressor, open('model.pkl', 'wb'))
-model = pickle.load(open('model.pkl', 'rb'))
-print(model.predict([[57, 0, 0, 120, 354, 0, 1, 163, 1, 0.6, 2, 0, 2]]))
+# pickle.dump(regressor, open('model.pkl', 'wb'))
+# model = pickle.load(open('model.pkl', 'rb'))
+
+pickle.dump(regressor, open(f'{"models/"}{arr[selected_dataset_index]}{".pkl"}', 'wb'))
+model = pickle.load(open(f'{"models/"}{arr[selected_dataset_index]}{".pkl"}', 'rb'))
+
+# prints the prediction according to model
+print(model.predict([inputs]))
 
 # Drawing plots
 plt.plot(hist.history['loss'])
